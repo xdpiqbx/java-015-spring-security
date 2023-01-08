@@ -2,6 +2,7 @@
 
 ```java
 ThreadLocal<String> name = new ThreadLocal<>();
+// allows to store data that will be accessible only by a specific thread
 // ThreadLocal has his own different data in different threads
 name.set("In default thread");
 new Thread(() -> {
