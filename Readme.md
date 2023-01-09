@@ -154,17 +154,27 @@ public class CustomAuthProvider implements AuthenticationProvider {
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     // authentication - те що сконструює spring у відповідь на наш логін та пароль
-    String name = authentication.getName();
-    String pass = authentication.getCredentials().toString();
-    UserDetails userDetails = userDetailsService.loadUserByUsername(name);
-    if(!userDetails.getPassword().equals(pass)){
-      throw new BadCredentialsException("Invalid pass");
-    }
-    return new UsernamePasswordAuthenticationToken(name, pass);
+    String username = authentication.getName();
+    String password = authentication.getCredentials().toString();
+    System.out.println("password = " + password);
+    UserDetails user = userDetailsService.loadUserByUsername(username);
+    return checkPassword(user, password);
   }
   @Override
   public boolean supports(Class<?> authentication) {
-    return true;
+    return  UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+  }
+  private Authentication checkPassword(UserDetails user, String rawPassword){
+    if(Objects.equals(rawPassword, user.getPassword())){
+      User innerUser = new User(
+          user.getUsername(),
+          user.getPassword(),
+          user.getAuthorities()
+      );
+      return new UsernamePasswordAuthenticationToken(innerUser, user.getPassword(), user.getAuthorities());
+    }else{
+      throw new BadCredentialsException("Bad credentials");
+    }
   }
 }
 ```
@@ -172,3 +182,30 @@ public class CustomAuthProvider implements AuthenticationProvider {
 ## DefaultSecurityConfig
 
 >Зклейка, додаємо до ланцюга провайдерів нашого CustomAuthProvider
+
+```java
+@EnableWebSecurity
+public class DefaultSecurityConfig {
+  private final CustomAuthProvider authProvider;
+  @Bean
+  PasswordEncoder passwordEncoder(){
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+  }
+  @Bean
+  SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception{
+    http
+        .authorizeHttpRequests()
+        .anyRequest()
+        .authenticated()
+        .and()
+        .httpBasic()
+        .and()
+        .formLogin(Customizer.withDefaults());
+    return http.build();
+  }
+  @Autowired
+  public void injectCustomAuthProvider(AuthenticationManagerBuilder auth) throws Exception{
+    auth.authenticationProvider(authProvider);
+  }
+}
+```
