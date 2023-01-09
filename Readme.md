@@ -1,5 +1,7 @@
 # java-015-spring-security
 
+<img src="./imgs/004 sec 001.png" width="600"/>
+
 ```java
 ThreadLocal<String> name = new ThreadLocal<>();
 // allows to store data that will be accessible only by a specific thread
@@ -16,6 +18,8 @@ System.out.println("name = " + name.get());
 Finished: In new thread
 name = In default thread
 ```
+
+<img src="./imgs/007 sec 004.png" width="600"/>
 
 ---
 
@@ -53,6 +57,13 @@ public class AuthController {
   }
 }
 ```
+
+<img src="./imgs/005 sec 002.png" width="600"/>
+
+---
+
+<img src="./imgs/006 sec 003.png" width="600"/>
+
 ## `Authentication authentication = context.getAuthentication();`
 ```java
 System.out.println("authentication = " + authentication);
