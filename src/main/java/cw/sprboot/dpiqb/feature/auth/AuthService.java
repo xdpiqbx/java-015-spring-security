@@ -7,10 +7,16 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+
 @Service
 public class AuthService {
   public boolean hasAuthority(String authority){
-    return getUser().getAuthorities().stream()
+    Collection<GrantedAuthority> authorities = getUser().getAuthorities();
+    System.out.println("authorities = " + authorities);
+    System.out.println("authorities.stream().map(it->it.getAuthority()).toList() = " + authorities.stream().map(GrantedAuthority::getAuthority).toList());
+
+    return authorities.stream()
         .map(GrantedAuthority::getAuthority)
         .anyMatch(it -> it.equals(authority));
   }

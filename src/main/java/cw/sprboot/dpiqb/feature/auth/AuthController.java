@@ -20,7 +20,7 @@ public class AuthController {
 
   @GetMapping("/super-admin")
   public ModelAndView superAdminOnly(){
-    if(!authService.hasAuthority("admin")){
+    if(!authService.hasAuthority("ADMIN")){
       return new ModelAndView("forbidden");
     }
     ModelAndView result = new ModelAndView("super-admin");
