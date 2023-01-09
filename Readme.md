@@ -100,3 +100,75 @@ System.out.println("principal.getClass() = " + principal.getClass());
 //  principal.getPassword() = null
 //  principal.getClass() = class org.springframework.security.core.userdetails.User
 ```
+---
+## UserDetailsService
+
+>Де беремо юзерів
+
+Коли `Spring` бачить імплементацію `UserDetailsService` то він починає юзати саме її і перестає створювати дефолтного юзера з довгим паролем
+
+`public class CustomUserDetailsService implements UserDetailsService {...}`
+```java
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+  // для простоти тут Map але реально тут буде робота з базод даних
+  private static final Map<String, String> USERS = Map.of(
+      "user", "1111",
+      "admin", "aaaa"
+  );
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    // відразу перевіряю чи є в мене такий юзер
+    if(!USERS.containsKey(username)){
+      throw new UsernameNotFoundException(username);
+    }
+    // Якщо все Ок - повертаю імплементацію UserDetails
+    return new UserDetails() {
+      @Override
+      public Collection<? extends GrantedAuthority> getAuthorities() {...}
+      @Override
+      public String getPassword() {...}
+      @Override
+      public String getUsername() {...}
+      @Override
+      public boolean isAccountNonExpired() {...}
+      @Override
+      public boolean isAccountNonLocked() {...}
+      @Override
+      public boolean isCredentialsNonExpired() {...}
+      @Override
+      public boolean isEnabled() {...}
+    };
+  }
+}
+```
+
+## CustomAuthenticationProvider
+
+>Як ми автентифікуємо юзерів
+
+```java
+@Service
+public class CustomAuthProvider implements AuthenticationProvider {
+  private final CustomUserDetailsService userDetailsService;
+  @Override
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    // authentication - те що сконструює spring у відповідь на наш логін та пароль
+    String name = authentication.getName();
+    String pass = authentication.getCredentials().toString();
+    UserDetails userDetails = userDetailsService.loadUserByUsername(name);
+    if(!userDetails.getPassword().equals(pass)){
+      throw new BadCredentialsException("Invalid pass");
+    }
+    return new UsernamePasswordAuthenticationToken(name, pass);
+  }
+  @Override
+  public boolean supports(Class<?> authentication) {
+    return true;
+  }
+}
+```
+
+## DefaultSecurityConfig
+
+>Зклейка, додаємо до ланцюга провайдерів нашого CustomAuthProvider

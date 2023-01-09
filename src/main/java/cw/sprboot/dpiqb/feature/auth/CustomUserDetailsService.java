@@ -7,55 +7,61 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
   private static final Map<String, String> USERS = Map.of(
-      "user", "1111",
-      "admin", "aaaa"
+      "user", "user",
+      "admin", "admin"
   );
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
     if(!USERS.containsKey(username)){
       throw new UsernameNotFoundException(username);
     }
 
-    return new UserDetails() {
+    UserDetails result = new UserDetails() {
       @Override
       public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return Collections.singleton((GrantedAuthority) () -> username);
       }
 
       @Override
       public String getPassword() {
-        return null;
+        return USERS.get(username);
       }
 
       @Override
       public String getUsername() {
-        return null;
+        return username;
       }
 
       @Override
       public boolean isAccountNonExpired() {
-        return false;
+        return true;
       }
 
       @Override
       public boolean isAccountNonLocked() {
-        return false;
+        return true;
       }
 
       @Override
       public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
       }
 
       @Override
       public boolean isEnabled() {
-        return false;
+        return true;
       }
     };
+    System.out.println("Creating user: CustomUserDetailsService");
+    System.out.println("result.getPassword() = " + result.getPassword());
+    System.out.println("result.getUsername() = " + result.getUsername());
+    return result;
   }
 }

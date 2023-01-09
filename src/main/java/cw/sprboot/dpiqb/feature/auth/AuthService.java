@@ -7,8 +7,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-
 @Service
 public class AuthService {
   public boolean hasAuthority(String authority){
@@ -24,6 +22,8 @@ public class AuthService {
   }
   private Authentication getAuthentication(){
     SecurityContext context = SecurityContextHolder.getContext();
-    return context.getAuthentication();
+    Authentication authentication = context.getAuthentication();
+    System.out.println("AuthService authentication = " + authentication);
+    return authentication;
   }
 }
