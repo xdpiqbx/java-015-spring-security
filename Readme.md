@@ -222,3 +222,30 @@ public class DefaultSecurityConfig {
 ```
 
 [JDBC Authentication](https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/jdbc.html)
+
+[Common Application Properties](https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html)
+
+
+`gradlew bootJar`
+
+`\build\libs`
+
+`java -jar spring-boot-app.jar`
+
+```text
+bootJar{
+	archiveFileName = 'spring-boot-app.jar'
+}
+
+tasks.register('release', Copy){
+	from layout.buildDirectory.file("./libs/spring-boot-app.jar")
+	into layout.projectDirectory.dir("/release")
+	doLast {
+		delete file(layout.buildDirectory.file("./libs/spring-boot-app.jar"))
+	}
+}
+
+release.dependsOn bootJar
+```
+
+`java -DAPP_NAME=Application -DDB_URL=/some-db-url -DDB_USER=admin -DDB_PASS=@2ev%267 -jar spring-boot-app.jar`

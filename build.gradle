@@ -36,3 +36,17 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootJar{
+	archiveFileName = 'spring-boot-app.jar'
+}
+
+tasks.register('release', Copy){
+	from layout.buildDirectory.file("./libs/spring-boot-app.jar")
+	into layout.projectDirectory.dir("/release")
+	doLast {
+		delete file(layout.buildDirectory.file("./libs/spring-boot-app.jar"))
+	}
+}
+
+release.dependsOn bootJar
